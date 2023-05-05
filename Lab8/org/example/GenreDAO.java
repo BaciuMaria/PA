@@ -1,10 +1,13 @@
 package org.example;
+import org.example.entities.Genre;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GenreDAO {
     public void create(String name) throws SQLException {
@@ -16,22 +19,45 @@ public class GenreDAO {
         }
     }
 
-    public Integer findByName(String name) throws SQLException {
+    public Genre findByName(String name) throws SQLException {
         Connection con = Database.getConnection();
         try (Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(
-                     "select id from genres where name='" + name + "'")) {
-            return rs.next() ? rs.getInt(1) : null;
+                     "select * from genres where name='" + name + "'")) {
+            if (rs.next()) {
+                int id = rs.getInt("id");
+                return new Genre(id, name);
+            } else {
+                return null;
+            }
         }
     }
-
-    public String findById(int id) throws SQLException {
+    public Genre findById(int id) throws SQLException {
         Connection con = Database.getConnection();
         try (Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(
-                     "select name from genres where id=" + id)) {
-            return rs.next() ? rs.getString(1) : null;
+                     "select * from genres where id=" + id)) {
+            if (rs.next()) {
+                String name = rs.getString("name");
+                return new Genre(id,name);
+            } else {
+                return null;
+            }
         }
+    }
+    public List<Genre> findAll() throws SQLException {
+        List<Genre> genres = new ArrayList<>();
+        Connection con = Database.getConnection();
+        try (Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM genres")) {
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                Genre genre = new Genre(id, name);
+                genres.add(genre);
+            }
+        }
+        return genres;
     }
 
 }
